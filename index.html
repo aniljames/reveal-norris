@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engineering Precision - Bike Reveal</title>
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React & ReactDOM via CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  
+  <!-- Babel for parsing JSX in browser -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Framer Motion via CDN -->
+  <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      background-color: #09090b; /* zinc-950 */
+      color: white;
+      overflow-x: hidden;
+    }
+    
+    /* Smooth, dark scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #09090b; 
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #3f3f46; 
+      border-radius: 5px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #52525b; 
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useRef } = React;
+    // Framer motion uses the window.FramerMotion global object in its UMD build
+    const { motion, useScroll, useTransform } = window.FramerMotion;
+
+    const BikeReveal = () => {
+      const containerRef = useRef(null);
+
+      // Track scroll progress of the container
+      const { scrollYProgress } = useScroll({
+        target: containerRef,
+        offset: ["start start", "end end"]
+      });
+
+      // Mask wipe animation
+      const clipPathInset = useTransform(
+        scrollYProgress, 
+        [0, 1], 
+        ["inset(0% 0% 0% 0%)", "inset(0% 100% 0% 0%)"]
+      );
+      
+      // Dynamic text sizing based on scroll
+      const textOpacity = useTransform(scrollYProgress, [0, 0.4], [0.8, 0.05]);
+      const textScale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
+
+      // Scanline positioning
+      const scanlineLeft = useTransform(scrollYProgress, [0, 1], ["100%", "0%"]);
+      const scanlineOpacity = useTransform(scrollYProgress, [0, 0.05, 0.95, 1], [0, 1, 1, 0]);
+
+      return (
+        <div className="bg-zinc-950 w-full font-sans">
+          
+          {/* HERO SECTION - To give context before the scroll reveal */}
+          <div className="h-screen w-full flex flex-col items-center justify-center text-center px-4 relative">
+            <motion.h2 
+              className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1 }}
+            >
+              The Future of Mobility
+            </motion.h2>
+            <motion.p 
+              className="text-zinc-400 max-w-lg mb-12 text-lg md:text-xl"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.2 }}
+            >
+              Scroll down to explore the engineering behind our latest high-performance motorcycle. Witness the precision underneath.
+            </motion.p>
+            
+            <motion.div 
+              className="animate-bounce w-12 h-12 rounded-full border border-zinc-700 flex items-center justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, delay: 0.5 }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </motion.div>
+          </div>
+
+          {/* THE REVEAL SECTION */}
+          <div ref={containerRef} className="relative h-[200vh]">
+            <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col items-center justify-center bg-zinc-950">
+              
+              <motion.div 
+                style={{ opacity: textOpacity, scale: textScale }}
+                className="absolute z-0 w-full flex justify-center pointer-events-none select-none"
+              >
+                <h1 className="text-[12vw] font-black text-zinc-800 tracking-tighter uppercase whitespace-nowrap">
+                  Engineering Precision
+                </h1>
+              </motion.div>
+
+              <div className="relative z-10 w-full max-w-7xl px-4 h-full max-h-[80vh] flex items-center justify-center">
+                
+                {/* Layer 1: Blueprint */}
+                <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+                  <img 
+                    src="https://images.unsplash.com/photo-1620803450917-8e6bfed62ef5?q=80&w=2000&auto=format&fit=crop" 
+                    alt="Blueprint"
+                    className="w-full h-full object-cover md:object-contain opacity-50 filter grayscale contrast-150 sepia-[.2] hue-rotate-[180deg]"
+                  />
+                </div>
+
+                {/* Layer 2: Masked Bike */}
+                <motion.div 
+                  style={{ clipPath: clipPathInset }}
+                  className="absolute inset-0 flex items-center justify-center overflow-hidden"
+                >
+                  <img 
+                    src="https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2000&auto=format&fit=crop" 
+                    alt="Realistic Motorcycle"
+                    className="w-full h-full object-cover md:object-contain shadow-2xl"
+                  />
+                </motion.div>
+                
+                {/* Layer 3: Scanline Effect */}
+                <motion.div 
+                  className="absolute z-20 top-0 bottom-0 w-[2px] bg-cyan-400"
+                  style={{ 
+                    left: scanlineLeft,
+                    opacity: scanlineOpacity,
+                    boxShadow: "0 0 15px 2px rgba(34, 211, 238, 0.6)"
+                  }}
+                >
+                  <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-[20px] bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent blur-sm hidden md:block" />
+                </motion.div>
+
+              </div>
+
+              {/* Scroll Indicator specific to the sticky area */}
+              <motion.div 
+                className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none"
+                style={{ opacity: useTransform(scrollYProgress, [0, 0.1], [1, 0]) }}
+              >
+                <span className="text-zinc-500 text-xs tracking-widest uppercase font-semibold">Scroll to scan</span>
+                <div className="w-[1px] h-12 bg-gradient-to-b from-zinc-500 to-transparent" />
+              </motion.div>
+
+            </div>
+          </div>
+
+          {/* FOOTER SECTION - To allow scrolling past the sticky effect */}
+          <div className="h-[60vh] flex flex-col items-center justify-center text-center bg-zinc-950 border-t border-zinc-900 px-4">
+            <h2 className="text-4xl font-bold text-white mb-6">Experience It Live</h2>
+            <p className="text-zinc-400 mb-8 max-w-md">The perfect synthesis of mechanical engineering and modern aesthetic design. Available soon.</p>
+            <button className="px-10 py-4 bg-white text-black font-semibold rounded-full hover:scale-105 transition-transform">
+              Reserve Your Build
+            </button>
+          </div>
+
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<BikeReveal />);
+  </script>
+</body>
+</html>
